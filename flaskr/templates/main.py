@@ -10,8 +10,8 @@ def first_page():
 def get_all_users():
     raise NotImplementedError
 
-@app.get("/users/{id}")
-def get_users_by_id(id):
+@app.get("/users/<int:id_user>")
+def get_users_by_id(id_user):
     raise NotImplementedError
 
 @app.post("/users")
@@ -19,10 +19,10 @@ def create_new_user():
     raise NotImplementedError
 
 
-@app.put("/users/{id}")
-def edit_user_by_id(id):
+@app.put("/users/<int:id_user>")
+def edit_user_by_id(id_user):
     raise NotImplementedError
 
-@app.delete("/users/{id}")
-def delete_user_by_id(id):
+@app.delete("/users/<int:id_user>")
+def delete_user_by_id(id_user):
     raise NotImplementedError
