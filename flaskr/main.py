@@ -1,4 +1,4 @@
-from . import create_app
+from . import create_app,db
 
 app = create_app()
 
@@ -16,7 +16,16 @@ def get_users_by_id(id_user):
 
 @app.post("/users")
 def create_new_user():
-    raise NotImplementedError
+    username, password = request.args.get("username", "password")
+    app.logger.debug(f"Registering {username} in db")
+    cursor = db.get_db().cursor()
+    create_new_user = f"INSERT INTO users VALUES ({username},{password});"
+    try:
+        cursor.execute(create_new_user)
+    except Exception:
+        app.logger.error(f"Could not register {username}")
+    finally:
+        db.close_db()
 
 
 @app.put("/users/<int:id_user>")
