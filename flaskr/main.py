@@ -1,3 +1,5 @@
+from flask import request, jsonify
+
 from . import create_app,db
 
 app = create_app()
@@ -16,16 +18,19 @@ def get_users_by_id(id_user):
 
 @app.post("/users")
 def create_new_user():
-    username, password = request.args.get("username", "password")
-    app.logger.debug(f"Registering {username} in db")
+    username, password = request.args.get("username"),request.args.get("password")
+    app.logger.debug(f"Registering user {username} in db")
     cursor = db.get_db().cursor()
-    create_new_user = f"INSERT INTO users VALUES ({username},{password});"
+    create_new_user = f"INSERT INTO users (username, password) VALUES ('{username}','{password}');"
     try:
         cursor.execute(create_new_user)
-    except Exception:
-        app.logger.error(f"Could not register {username}")
+    except Exception as e:
+        app.logger.error(f"Could not register user {username}")
+        return jsonify({"error": str(e)}), 500
     finally:
         db.close_db()
+    
+    return jsonify({"message": "User added successfully!"}), 201
 
 
 @app.put("/users/<int:id_user>")
