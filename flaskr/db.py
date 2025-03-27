@@ -48,7 +48,10 @@ def safe_query_execute(query:str, params:tuple, method:str="GET")->tuple:
         close_db()
     
     if method == "GET":
-        return jsonify({"message":"Execution successful", "data":[dict(x) for x in data]}), 200
+        if len(data)>0:
+            return jsonify({"message":"Execution successful", "data":[dict(x) for x in data]}), 200
+        else: 
+            return jsonify({"message":"Execution successful, but haven't found anything", "data":""}), 404
     else:
         return jsonify({"message":"Execution successful", "data":""}), 201
 
