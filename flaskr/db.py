@@ -37,10 +37,10 @@ def init_db_on_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(restart_db_command)
 
-def safe_query_execute(query, method="GET")->tuple:
+def safe_query_execute(query:str, params:tuple, method:str="GET")->tuple:
     db = get_db()
     try:
-        cur = db.execute(query)
+        cur = db.execute(query, params)
         data = cur.fetchall() if method == "GET" else db.commit()
     except sqlite3.Error as e:
         return jsonify({"message": str(e), "error": str(e)}), 500

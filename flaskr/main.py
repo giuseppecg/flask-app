@@ -11,26 +11,29 @@ def first_page():
 @app.get("/users")
 def get_all_users():
     get_users_query = "SELECT * FROM users" 
-    return db.safe_query_execute(get_users_query, "GET")
+    return db.safe_query_execute(get_users_query,{}, method="GET")
     
 
 @app.get("/users/<int:id_user>")
 def get_users_by_id(id_user):
-    get_user_by_id_query = f"SELECT * FROM users WHERE id={id_user}"
-    return db.safe_query_execute(get_user_by_id_query, "GET")
+    get_user_by_id_query = "SELECT * FROM users WHERE id=:id_user"
+    return db.safe_query_execute(get_user_by_id_query, params=dict(id_user=id_user), method="GET")
 
 @app.post("/users")
 def create_new_user():
-    username, password = request.args.get("username"),request.args.get("password")
-    app.logger.debug(f"Registering user {username} in db")
-    create_new_user_query = f"INSERT INTO users (username, password) VALUES ('{username}','{password}');"
-    return db.safe_query_execute(create_new_user_query, "POST")
+    query_params = dict(username = request.args.get("username"), password = request.args.get("password"))
+    app.logger.debug(f"Registering user {request.args.get("username")} in db")
+    app.logger.debug(query_params)
+    create_new_user_query = "INSERT INTO users (username, password) VALUES (:username,:password);"
+    return db.safe_query_execute(create_new_user_query, params=query_params, method="POST")
 
 @app.put("/users/<int:id_user>")
 def edit_user_by_id(id_user):
-    username, password = request.args.get("username"),request.args.get("password")
-    edit_user_by_id = f"UPDATE users SET username='{username}', password='{password}' WHERE id={id_user}"
-    return db.safe_query_execute(edit_user_by_id, "PUT")
+    query_params = dict(username = request.args.get("username"), 
+                        password = request.args.get("password"),
+                        id_user = id_user)
+    edit_user_by_id = "UPDATE users SET username=:username, password=:password WHERE id=:id_user"
+    return db.safe_query_execute(edit_user_by_id, params=query_params, method="PUT")
 
 @app.delete("/users/<int:id_user>")
 def delete_user_by_id(id_user):
