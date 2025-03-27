@@ -28,8 +28,11 @@ def create_new_user():
 
 @app.put("/users/<int:id_user>")
 def edit_user_by_id(id_user):
-    raise NotImplementedError
+    username, password = request.args.get("username"),request.args.get("password")
+    edit_user_by_id = f"UPDATE users SET username='{username}', password='{password}' WHERE id={id_user}"
+    return db.safe_query_execute(edit_user_by_id, "PUT")
 
 @app.delete("/users/<int:id_user>")
 def delete_user_by_id(id_user):
-    raise NotImplementedError
+    delete_user_by_id = f"DELETE FROM users WHERE id={id_user}"
+    return db.safe_query_execute(delete_user_by_id)

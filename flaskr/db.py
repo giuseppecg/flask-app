@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from datetime import datetime
 
@@ -36,19 +37,20 @@ def init_db_on_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(restart_db_command)
 
-def safe_query_execute(query, method)->tuple:
-    cursor = get_db().cursor()
+def safe_query_execute(query, method="GET")->tuple:
+    db = get_db()
     try:
-        data = cursor.execute(query).fetchall()
+        cur = db.execute(query)
+        data = cur.fetchall() if method == "GET" else db.commit()
     except sqlite3.Error as e:
         return jsonify({"message": str(e), "error": str(e)}), 500
     finally:
         close_db()
     
-    if method == "POST":
-        return jsonify({"message":"Execution successful", "data":data}), 201
+    if method == "GET":
+        return jsonify({"message":"Execution successful", "data":[dict(x) for x in data]}), 200
     else:
-        return jsonify({"message":"Execution successful", "data":data}), 200
+        return jsonify({"message":"Execution successful", "data":""}), 201
 
 @click.command('init-db')
 def restart_db_command() -> None:
