@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 
 import click
-from flask import current_app, g
+from flask import current_app, g, jsonify
 
 
 def get_db() -> g:
@@ -36,6 +36,19 @@ def init_db_on_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(restart_db_command)
 
+def safe_query_execute(query, method)->tuple:
+    cursor = get_db().cursor()
+    try:
+        data = cursor.execute(query).fetchall()
+    except sqlite3.Error as e:
+        return jsonify({"message": str(e), "error": str(e)}), 500
+    finally:
+        close_db()
+    
+    if method == "POST":
+        return jsonify({"message":"Execution successful", "data":data}), 201
+    else:
+        return jsonify({"message":"Execution successful", "data":data}), 200
 
 @click.command('init-db')
 def restart_db_command() -> None:

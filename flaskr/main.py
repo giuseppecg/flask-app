@@ -10,28 +10,21 @@ def first_page():
 
 @app.get("/users")
 def get_all_users():
-    raise NotImplementedError
+    get_users_query = "SELECT * FROM users" 
+    return db.safe_query_execute(get_users_query, "GET")
+    
 
 @app.get("/users/<int:id_user>")
 def get_users_by_id(id_user):
-    raise NotImplementedError
+    get_user_by_id_query = f"SELECT * FROM users WHERE id={id_user}"
+    return db.safe_query_execute(get_user_by_id_query, "GET")
 
 @app.post("/users")
 def create_new_user():
     username, password = request.args.get("username"),request.args.get("password")
     app.logger.debug(f"Registering user {username} in db")
-    cursor = db.get_db().cursor()
-    create_new_user = f"INSERT INTO users (username, password) VALUES ('{username}','{password}');"
-    try:
-        cursor.execute(create_new_user)
-    except Exception as e:
-        app.logger.error(f"Could not register user {username}")
-        return jsonify({"error": str(e)}), 500
-    finally:
-        db.close_db()
-    
-    return jsonify({"message": "User added successfully!"}), 201
-
+    create_new_user_query = f"INSERT INTO users (username, password) VALUES ('{username}','{password}');"
+    return db.safe_query_execute(create_new_user_query, "POST")
 
 @app.put("/users/<int:id_user>")
 def edit_user_by_id(id_user):
