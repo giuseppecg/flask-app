@@ -1,8 +1,10 @@
 from flask import request, jsonify
 
-from . import create_app,db
+from . import create_app
+from .db import DB
 
 app = create_app()
+db = DB(app)
 
 @app.get("/")
 def first_page():

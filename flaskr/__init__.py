@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 
-from . import db
+from .db import DB
 
 
 def create_app(test_config=None):
@@ -22,6 +22,6 @@ def create_app(test_config=None):
     except OSError:
         pass
     
-    db.init_db_on_app(app)
+    DB().init_db_on_app(app)
 
     return app
