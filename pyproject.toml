@@ -5,3 +5,9 @@ package-dir = {"" = "flaskr"}
 name = "my-flask"
 requires-python = ">=3.12"
 version = "0.1.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["flaskr"]
