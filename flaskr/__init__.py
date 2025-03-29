@@ -22,6 +22,6 @@ def create_app(test_config=None):
     except OSError:
         pass
     
-    DB().init_db_on_app(app)
+    DB(app)
 
     return app

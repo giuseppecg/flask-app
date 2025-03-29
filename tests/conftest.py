@@ -2,8 +2,10 @@ import os
 import tempfile
 
 import pytest
+from flask.testing import FlaskClient
+
 from flaskr import create_app
-from flaskr.db import get_db, init_db
+from flaskr.db import DB
 
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
@@ -12,24 +14,22 @@ with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
 
 @pytest.fixture
 def app():
-    db_fd, db_path = tempfile.mkstemp()
-
     app = create_app({
         'TESTING': True,
-        'DATABASE': db_path,
+        'DATABASE_LOCATION': "test.sqlite",
     })
-
-    with app.app_context():
-        init_db()
-        get_db().executescript(_data_sql)
-
     yield app
-
-    os.close(db_fd)
-    os.unlink(db_path)
     
 @pytest.fixture
-def client(app):
+def db(app) -> DB:
+    db = DB(app)
+    with app.app_context():
+        db.init_db()
+        db.get_db().executescript(_data_sql)
+    return db
+    
+@pytest.fixture
+def client(app) -> FlaskClient:
     return app.test_client()
 
 

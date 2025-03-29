@@ -1,47 +1,47 @@
 import sqlite3
-
 import pytest
-from flaskr.db import get_db, safe_query_execute
+from flask import g
 
 
-
-def test_close_db(app):
+def test_db_initialization(app, db):
+    """Test that the DB class is properly initialized with the app."""
+    assert hasattr(db, "_init_db_on_app"), "DB class should have init_db_on_app method"
+    assert hasattr(db, "safe_query_execute"), "DB class should have safe_query_execute method"
+    
+    
+def test_safe_query_execute_not_found(app, db):
+    """Test safe_query_execute returns 404 when no records are found."""
     with app.app_context():
-        db = get_db()
-        assert db is get_db()
-
-    with pytest.raises(sqlite3.ProgrammingError) as e:
-        db.execute('SELECT 1')
-
-    assert 'closed' in str(e.value)
-
-def test_init_db(runner, monkeypatch):
-    class Recorder(object):
-        called = False
-
-    def fake_init_db():
-        Recorder.called = True
-
-    monkeypatch.setattr('flaskr.db.init_db', fake_init_db)
-    result = runner.invoke(args=['init-db'])
-    assert 'Initialized' in result.output
-    assert Recorder.called
-    
-    
-def test_safe_query_execute_success_201(monkeypatch, app):
-    q = "INSERT INTO (username, password) VALUES (:username,:password);"
-    def mock_get_db():
-        class MockDB:
-            def execute(self, query, params):
-                return None
-            def commit(self):
-                pass 
-        return MockDB()
-    
-    monkeypatch.setattr("app.get_db", mock_get_db)
-    
+        response, status_code = db.safe_query_execute("SELECT * FROM users WHERE id=999", {}, method="GET")
+        assert status_code == 404
+        assert response.json["message"] == "Execution successful, but haven't found anything"
+        
+def test_safe_query_execute_sql_error(app, db):
+    """Test safe_query_execute handles SQL errors properly."""
     with app.app_context():
-        response, status_code = safe_query_execute(q, params=dict(username="a_name", paswword="A_password", method="POST"))
-        assert status_code = 201
-        assert response["message"] = "Execution successful"
+        response, status_code = db.safe_query_execute("SELECT * FROM nonexistent_table", {}, method="GET")
+        assert status_code == 500
+        assert "error" in response.json
+
+def test_safe_query_execute_select(app, db):
+    """Test safe_query_execute handles SQL errors properly."""
+    with app.app_context():
+        response, status_code = db.safe_query_execute("SELECT * FROM users WHERE id = 1", {}, method="GET")
+        assert status_code == 200
+        assert response.json["message"] == "Execution successful"
+        assert len(response.json["data"])>0
     
+def test_safe_query_execute_insert(app, db):
+    """Test safe_query_execute handles SQL errors properly."""
+    with app.app_context():
+        response, status_code = db.safe_query_execute("INSERT INTO users (username, password) VALUES ('name','pass')", {}, method="POST")
+        assert status_code == 201
+        assert response.json["message"] == "Execution successful"
+
+def test_db_closing(db, app):
+    """Test that the database connection is properly closed after queries."""
+    with app.app_context():
+        db_conn = db.get_db()
+        assert db_conn is not None, "Database should be open"
+        db.close_db()
+        assert "db" not in g, "Database should be closed after calling close_db()"

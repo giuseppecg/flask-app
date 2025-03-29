@@ -7,18 +7,30 @@ from flask import current_app, g, jsonify
 
 class DB():
     
-    def __init__(self, app=None):
+    def __init__(self, app=None) -> None:
         if app is not None:
-            self.init_db_on_app(app)
+            self._init_db_on_app(app)
     
-    def init_db_on_app(self, app):
+    def _init_db_on_app(self, app) -> None:
         """"Method to be called inside the __init__ factory to start from scratch the db for each application"""
         app.teardown_appcontext(self.close_db)
         app.cli.add_command(self.restart_db_command)
+    
+    @staticmethod
+    def adapt_datetime(val):
+        """Convert datetime to ISO format text."""
+        return val.isoformat()
+
+    @staticmethod
+    def convert_datetime(val):
+        """Convert ISO format text to datetime object."""
+        return datetime.fromisoformat(val.decode("utf-8")) if isinstance(val, bytes) else datetime.fromisoformat(val)
         
     def get_db(self) -> g:
         """Returns an instance of db so you can create a cursor and comunicate with it."""
         if 'db' not in g:
+            sqlite3.register_adapter(datetime, self.adapt_datetime)
+            sqlite3.register_converter("timestamp", self.convert_datetime)
             g.db = sqlite3.connect(
                 current_app.config['DATABASE_LOCATION'],
                 detect_types=sqlite3.PARSE_DECLTYPES
@@ -29,7 +41,7 @@ class DB():
 
     def init_db(self) -> None:
         """Starts th sqlite instance."""
-        db = get_db()
+        db = self.get_db()
 
         with current_app.open_resource('schema.sql') as f:
             db.executescript(f.read().decode('utf8'))
@@ -44,11 +56,11 @@ class DB():
     @click.command('init-db')
     def restart_db_command(self) -> None:
         """Clear the existing data and create new tables."""
-        self._init_app(app)
+        self.init_app(app)
         click.echo('Initialized the database.')
         
 
-    def safe_query_execute(self, query:str, params:dict, method:str="GET")->tuple:
+    def safe_query_execute(self, query:str, params:dict, method:str="GET") -> tuple:
         """"This method executes cleanly queries, handling errors and returning more precise codes and messages"""
         db = self.get_db()
         try:
