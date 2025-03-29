@@ -4,7 +4,7 @@ init-db:
 
 .PHONY: init-app
 init-app: 
-	waitress-serve --call 'flaskr:main'
+	waitress-serve --port 8085 --call 'flaskr.main:get_app' 
 
 .PHONY: init-app-dev
 init-app-dev: 

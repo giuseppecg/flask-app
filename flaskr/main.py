@@ -1,10 +1,14 @@
 from flask import request, jsonify
+from waitress import serve
 
-from . import create_app
-from .db import DB
+from flaskr import create_app
+from flaskr.db import DB
 
 app = create_app()
 db = DB(app)
+
+def get_app():
+    return app
 
 @app.get("/")
 def first_page():
