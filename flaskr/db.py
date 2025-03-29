@@ -53,10 +53,13 @@ class DB():
         if db is not None:
             db.close()
     
+    @staticmethod
     @click.command('init-db')
     def restart_db_command(self) -> None:
         """Clear the existing data and create new tables."""
-        self.init_app(app)
+        from flask import current_app
+        db_instance = DB(current_app)
+        db_instance.init_app(app)
         click.echo('Initialized the database.')
         
 
