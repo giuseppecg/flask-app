@@ -30,7 +30,7 @@ class TestDB:
             assert "error" in response.json
 
     def test_safe_query_execute_select(self, test_app, db):
-        """Test safe_query_execute handles SQL errors properly."""
+        """Test safe_query_execute handles SQL select statements."""
         with test_app.app_context():
             response, status_code = db.safe_query_execute(
                 "SELECT * FROM users WHERE id = 1", {}, method="GET"
@@ -40,7 +40,7 @@ class TestDB:
             assert len(response.json["data"]) > 0
 
     def test_safe_query_execute_insert(self, test_app, db):
-        """Test safe_query_execute handles SQL errors properly."""
+        """Test safe_query_execute handles SQL insert staments that are valid."""
         with test_app.app_context():
             response, status_code = db.safe_query_execute(
                 f"INSERT INTO users (username, password) VALUES ('{''.join(random.sample(string.digits, 8))}','pass')",
@@ -49,6 +49,17 @@ class TestDB:
             )
             assert status_code == 201
             assert response.json["message"] == "Execution successful"
+            
+    def test_safe_query_execute_insert_missing_data(self, test_app, db):
+        """Test safe_query_execute handles SQL insert staments that are valid."""
+        with test_app.app_context():
+            response, status_code = db.safe_query_execute(
+                f"INSERT INTO users (username, password) VALUES ('{''.join(random.sample(string.digits, 8))}')",
+                {},
+                method="POST",
+            )
+            assert status_code == 500
+            assert response.json["message"] == "1 values for 2 columns"
 
     def test_db_closing(self, test_app, db):
         """Test that the database connection is properly closed after queries."""

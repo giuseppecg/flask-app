@@ -18,12 +18,12 @@ class DB:
         app.cli.add_command(self.restart_db_command)
 
     @staticmethod
-    def adapt_datetime(val):
+    def adapt_datetime(val) -> str:
         """Convert datetime to ISO format text."""
         return val.isoformat()
 
     @staticmethod
-    def convert_datetime(val):
+    def convert_datetime(val) -> datetime:
         """Convert ISO format text to datetime object."""
         return (
             datetime.fromisoformat(val.decode("utf-8"))

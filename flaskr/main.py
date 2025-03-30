@@ -9,28 +9,33 @@ db = DB(app)
 
 
 def get_app():
+    """Function to be called by waitress. It returns the app instance."""
     return app
 
 
 @app.get("/")
 def first_page() -> str:
+    """First page of the app. It returns a string."""
     return "This is Giuseppe's Flask app"
 
 
 @app.get("/users")
 def get_all_users() -> tuple:
+    """Get all users from the database. It returns a list of users."""
     get_users_query = "SELECT * FROM users"
     return db.safe_query_execute(get_users_query, {}, method="GET")
 
 
 @app.get("/users/<int:id_user>")
 def get_users_by_id(id_user) -> tuple:
+    """Get a specific user from the database. It returns a specific user."""
     get_user_by_id_query = "SELECT * FROM users WHERE id=:id_user"
     return db.safe_query_execute(get_user_by_id_query, params=dict(id_user=id_user), method="GET")
 
 
 @app.post("/users")
 def create_new_user() -> tuple:
+    """Create a new user in the database. It returns the created user."""
     query_params = dict(
         username=request.args.get("username"), password=request.args.get("password")
     )
@@ -41,6 +46,7 @@ def create_new_user() -> tuple:
 
 @app.put("/users/<int:id_user>")
 def edit_user_by_id(id_user) -> tuple:
+    """Edit a specific user in the database. It returns the edited user."""
     query_params = dict(
         username=request.args.get("username"),
         password=request.args.get("password"),
@@ -53,6 +59,7 @@ def edit_user_by_id(id_user) -> tuple:
 
 @app.delete("/users/<int:id_user>")
 def delete_user_by_id(id_user) -> tuple:
+    """Delete a specific user from the database. It returns the deleted user."""
     delete_user_by_id = f"DELETE FROM users WHERE id={id_user}"
     app.logger.debug(f"Deleting user id {id_user} in db")
     return db.safe_query_execute(delete_user_by_id, params=dict(id_user=id_user), method="DELETE")

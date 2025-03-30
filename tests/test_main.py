@@ -39,18 +39,25 @@ class TestMainRoutes:
         assert response.status_code == 500
 
     def test_edit_user_by_id(self, main_client):
-        """Test the edit_user_by_id route. It should update a specific user with username and password as obligatory parameters."""
+        """
+        Test the edit_user_by_id route. It should update a specific user 
+        with username and password as obligatory parameters.
+        """
         response = main_client.put("/users/1?username=same&password=new_word")
         assert json.loads(response.data)["message"] == "Execution successful"
         assert response.status_code == 201
 
     def test_edit_user_fail_one_param(self, main_client):
-        """Test the edit_user_by_id route. It should update a specific user with username and password as obligatory parameters."""
+        """
+        Test the edit_user_by_id route. It should fail the update a specific user due to 
+        the lack of parameters.
+        """
         response = main_client.put("/users/1?password=new_word")
         assert json.loads(response.data)["message"] == "NOT NULL constraint failed: users.username"
         assert response.status_code == 500
 
     def test_delete_user_by_id(self, main_client):
+        """Test the delete_user_by_id route. It should delete a specific user."""
         response = main_client.delete("/users/1")
         assert json.loads(response.data)["message"] == "Execution successful"
         assert response.status_code == 201
