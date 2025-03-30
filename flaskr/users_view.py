@@ -1,34 +1,34 @@
 from functools import wraps
 
-from flask import request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app
 
 from flaskr.db import DB
     
 def with_db(func):
-    """Decorator to inject the db instance from the app context."""
+    """Decorator to inject the DB instance into the route function."""
     @wraps(func)
     def wrapper(*args, **kwargs):
-        db = current_app.extensions["db"]
-        return func(db, *args, **kwargs)
+        db = current_app.extensions["db"]  # Retrieve the DB instance
+        return func(db, *args, **kwargs)  # Pass it as the first argument
     return wrapper
 
+bp_users = Blueprint('users', __name__)
 
-def first_page() -> str:
-    """First page of the app. It returns a string."""
-    return "This is Giuseppe's Flask app"
-
+@bp_users.route("/", methods=["GET"])
 @with_db
 def get_all_users(db:DB) -> tuple:
     """Get all users from the database. It returns a list of users."""
     get_users_query = "SELECT * FROM users"
     return db.safe_query_execute(get_users_query, {}, method="GET")
 
+@bp_users.route("/<int:id_user>", methods=["GET"])
 @with_db
 def get_users_by_id(db:DB,id_user:int) -> tuple:
     """Get a specific user from the database. It returns a specific user."""
     get_user_by_id_query = "SELECT * FROM users WHERE id=:id_user"
     return db.safe_query_execute(get_user_by_id_query, params=dict(id_user=id_user), method="GET")
 
+@bp_users.route("/", methods=["POST"])
 @with_db
 def create_new_user(db:DB) -> tuple:
     """Create a new user in the database. It informs the created user."""
@@ -39,6 +39,7 @@ def create_new_user(db:DB) -> tuple:
     create_new_user_query = "INSERT INTO users (username, password) VALUES (:username,:password);"
     return db.safe_query_execute(create_new_user_query, params=query_params, method="POST")
 
+@bp_users.route("/<int:id_user>", methods=["PUT"])
 @with_db
 def edit_user_by_id(db:DB,id_user:int) -> tuple:
     """Edit a specific user in the database. It returns the edited user."""
@@ -51,6 +52,7 @@ def edit_user_by_id(db:DB,id_user:int) -> tuple:
     edit_user_by_id = "UPDATE users SET username=:username, password=:password WHERE id=:id_user"
     return db.safe_query_execute(edit_user_by_id, params=query_params, method="PUT")
 
+@bp_users.route("/<int:id_user>", methods=["DELETE"])
 @with_db
 def delete_user_by_id(db:DB,id_user:int) -> tuple:
     """Delete a specific user from the database. It returns the deleted user."""
