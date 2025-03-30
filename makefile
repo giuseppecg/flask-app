@@ -31,3 +31,7 @@ init-app-dev:
 .PHONY: tests
 tests:
 	@python -m pytest tests/ -ra
+
+.PHONY: black
+black:
+	@black -l 100 -q .
