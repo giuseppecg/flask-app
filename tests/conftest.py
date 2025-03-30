@@ -16,7 +16,7 @@ with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
 @pytest.fixture
 def test_app():
     """Create a new app for testing"""
-    test_app = create_app(
+    test_app,_ = create_app(
         {
             "TESTING": True,
             "DATABASE_LOCATION": "test.sqlite",

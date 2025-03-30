@@ -6,8 +6,8 @@ from flaskr import create_app
 class TestMainRoutes:
     def test_config(self):
         """Test the default configuration."""
-        assert not create_app().testing
-        assert create_app({"TESTING": True}).testing
+        assert not create_app()[0].testing
+        assert create_app({"TESTING": True})[0].testing
 
     def test_hello(self, main_client):
         """Test the hello route."""

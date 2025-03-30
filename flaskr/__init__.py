@@ -5,7 +5,11 @@ from flask import Flask
 from .db import DB
 
 
-def create_app(test_config=None):
+def create_app(test_config=None) -> tuple[Flask, DB]:
+    """
+    Create and configure the app. It creates the app instance and
+    configures the database.
+    """
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",
@@ -22,6 +26,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    DB(app)
+    db = DB(app)
 
-    return app
+    return app, db

@@ -1,65 +1,19 @@
-from flask import request, jsonify
-from waitress import serve
-
 from flaskr import create_app
-from flaskr.db import DB
+from flaskr import users_view 
 
-app = create_app()
-db = DB(app)
 
+app, db = create_app()
+app.extensions["db"] = db
+
+app.add_url_rule("/", view_func=users_view.first_page, methods=["GET"])
+app.add_url_rule("/users", view_func=users_view.get_all_users, methods=["GET"])
+app.add_url_rule("/users/<int:id_user>", view_func=users_view.get_users_by_id, methods=["GET"])
+app.add_url_rule("/users", view_func=users_view.create_new_user, methods=["POST"])
+app.add_url_rule("/users/<int:id_user>", view_func=users_view.edit_user_by_id, methods=["PUT"])
+app.add_url_rule("/users/<int:id_user>", view_func=users_view.delete_user_by_id, methods=["DELETE"])
 
 def get_app():
-    """Function to be called by waitress. It returns the app instance."""
+    """
+    Returns the app instance. To be used 
+    """
     return app
-
-
-@app.get("/")
-def first_page() -> str:
-    """First page of the app. It returns a string."""
-    return "This is Giuseppe's Flask app"
-
-
-@app.get("/users")
-def get_all_users() -> tuple:
-    """Get all users from the database. It returns a list of users."""
-    get_users_query = "SELECT * FROM users"
-    return db.safe_query_execute(get_users_query, {}, method="GET")
-
-
-@app.get("/users/<int:id_user>")
-def get_users_by_id(id_user) -> tuple:
-    """Get a specific user from the database. It returns a specific user."""
-    get_user_by_id_query = "SELECT * FROM users WHERE id=:id_user"
-    return db.safe_query_execute(get_user_by_id_query, params=dict(id_user=id_user), method="GET")
-
-
-@app.post("/users")
-def create_new_user() -> tuple:
-    """Create a new user in the database. It returns the created user."""
-    query_params = dict(
-        username=request.args.get("username"), password=request.args.get("password")
-    )
-    app.logger.debug(f"Registering user {request.args.get("username")} in db")
-    create_new_user_query = "INSERT INTO users (username, password) VALUES (:username,:password);"
-    return db.safe_query_execute(create_new_user_query, params=query_params, method="POST")
-
-
-@app.put("/users/<int:id_user>")
-def edit_user_by_id(id_user) -> tuple:
-    """Edit a specific user in the database. It returns the edited user."""
-    query_params = dict(
-        username=request.args.get("username"),
-        password=request.args.get("password"),
-        id_user=id_user,
-    )
-    app.logger.debug(f"Editing user id {id_user} to {request.args.get("username")} in db")
-    edit_user_by_id = "UPDATE users SET username=:username, password=:password WHERE id=:id_user"
-    return db.safe_query_execute(edit_user_by_id, params=query_params, method="PUT")
-
-
-@app.delete("/users/<int:id_user>")
-def delete_user_by_id(id_user) -> tuple:
-    """Delete a specific user from the database. It returns the deleted user."""
-    delete_user_by_id = f"DELETE FROM users WHERE id={id_user}"
-    app.logger.debug(f"Deleting user id {id_user} in db")
-    return db.safe_query_execute(delete_user_by_id, params=dict(id_user=id_user), method="DELETE")
