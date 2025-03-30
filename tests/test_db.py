@@ -49,7 +49,7 @@ class TestDB:
             )
             assert status_code == 201
             assert response.json["message"] == "Execution successful"
-            
+
     def test_safe_query_execute_insert_missing_data(self, test_app, db):
         """Test safe_query_execute handles SQL insert staments that are valid."""
         with test_app.app_context():
