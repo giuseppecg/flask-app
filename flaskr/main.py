@@ -16,6 +16,6 @@ def first_page() -> str:
 
 def get_app():
     """
-    Returns the app instance. To be used
+    Returns the app instance. To be called by waitress
     """
     return app
