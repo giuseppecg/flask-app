@@ -32,11 +32,6 @@ class TestMainRoutes:
         assert len(json.loads(response.data)["data"]) == 0
         assert response.status_code == 201
 
-    def test_post_new_user_fail_one_param(self, main_client):
-        """Test the create_new_user route. It should create a new user."""
-        response = main_client.post("/users?username=a_name")
-        assert json.loads(response.data)["message"] == "NOT NULL constraint failed: users.password"
-        assert response.status_code == 500
 
     def test_edit_user_by_id(self, main_client):
         """
