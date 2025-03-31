@@ -15,7 +15,6 @@ def with_db(func):
 
     return wrapper
 
-
 bp_users = Blueprint("users", __name__)
 
 
